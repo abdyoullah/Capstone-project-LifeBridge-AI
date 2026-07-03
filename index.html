@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBridge Pakistan - Emergency Response & Disaster Assistant</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand-section-sidebar">
+                <div class="brand-icon-sidebar">
+                    <i data-lucide="layers" style="color: white; width: 24px; height: 24px;"></i>
+                </div>
+                <div>
+                    <h2>LifeBridge Pakistan</h2>
+                    <span class="sub-badge">NDMA Connected</span>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <button class="nav-btn active" id="btn-dashboard" onclick="switchView('dashboard')">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </button>
+                <button class="nav-btn" id="btn-map-view" onclick="switchView('map-view')">
+                    <i data-lucide="map"></i> Live Disaster Map
+                </button>
+                <button class="nav-btn" id="btn-agent-view" onclick="switchView('agent-view')">
+                    <i data-lucide="bot"></i> LifeBridge AI Agent
+                </button>
+                <button class="nav-btn" id="btn-shelters-view" onclick="switchView('shelters-view')">
+                    <i data-lucide="home"></i> Shelters & Roads
+                </button>
+                <button class="nav-btn" id="btn-supplies-view" onclick="switchView('supplies-view')">
+                    <i data-lucide="boxes"></i> Supply Matching Hub
+                </button>
+                <button class="nav-btn" id="btn-safety-view" onclick="switchView('safety-view')">
+                    <i data-lucide="users"></i> Safety Registry
+                </button>
+                <button class="nav-btn" id="btn-volunteer-view" onclick="switchView('volunteer-view')">
+                    <i data-lucide="clipboard-list"></i> Volunteer Tasks
+                </button>
+            </nav>
+
+            <button class="btn-sos-sidebar" onclick="triggerSOS('SOS Alert')">
+                <i data-lucide="siren"></i> TRIGGER SOS
+            </button>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+
+            <!-- Top Control Header -->
+            <header class="app-header">
+                <div class="header-status-group">
+                    <span class="status-badge urgent" id="threat-badge">URGENT | CYCLONE</span>
+                    <div class="live-alert-ticker-container">
+                        <div class="alert-dot"></div>
+                        <div class="ticker-text-wrapper" id="header-status-ticker">CYCLONE STATUS : 86°F | Heavy Rain,
+                            High Winds
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-control-group">
+                    <div class="control-item">
+                        <label for="disaster-mode-select">DISASTER MODE</label>
+                        <select class="control-select" id="disaster-mode-select"
+                            onchange="changeDisasterMode(this.value)">
+                            <option value="cyclone">Karachi Cyclone (Category 4)</option>
+                            <option value="earthquake">Kashmir Earthquake (M7.6)</option>
+                            <option value="floods">Sindh River Monsoon Floods</option>
+                        </select>
+                    </div>
+                    <div class="control-item bandwidth">
+                        <label for="low-bandwidth-toggle">LOW BANDWIDTH</label>
+                        <label class="switch">
+                            <input type="checkbox" id="low-bandwidth-toggle" onchange="toggleBandwidth(this.checked)">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </header>
+
+            <!-- View Containers -->
+            <div class="view-workspace">
+
+                <!-- 1. Dashboard View -->
+                <section id="view-dashboard" class="view-panel active">
+
+                    <!-- Dashboard Metric Cards Row -->
+                    <div class="metrics-grid">
+                        <div class="metric-card critical">
+                            <div class="metric-label">ACTIVE THREAT LEVEL</div>
+                            <div class="metric-value" id="threat-value">EXTREME</div>
+                            <div class="metric-desc" id="threat-desc">Active storm surge & coastal wind damage</div>
+                        </div>
+                        <div class="metric-card success">
+                            <div class="metric-label">OPEN SHELTERS</div>
+                            <div class="metric-value" id="dashboard-shelters">3 Active</div>
+                            <div class="metric-desc" id="dashboard-occupancy">64% Avg Occupancy</div>
+                        </div>
+                        <div class="metric-card warning">
+                            <div class="metric-label">ROAD CONDITIONS</div>
+                            <div class="metric-value" id="dashboard-hazards">2 Blocked</div>
+                            <div class="metric-desc" id="dashboard-hazards-desc">3 Total Hazards Tracked</div>
+                        </div>
+                        <div class="metric-card info">
+                            <div class="metric-label">MATCHED RESOURCE OFFERS</div>
+                            <div class="metric-value" id="dashboard-resources">24</div>
+                            <div class="metric-desc">Volunteer actions synced</div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Grid: Map + AI chat -->
+                    <div class="dashboard-bottom-grid">
+                        <div class="dashboard-col map-preview">
+                            <div class="panel-header-simple">
+                                <i data-lucide="map" style="width: 16px; color: var(--color-success);"></i>
+                                <span>Live Response Operations Map</span>
+                            </div>
+                            <div id="dashboard-map-container" class="map-recontainer">
+                                <!-- Leaflet map element will reside here in dashboard mode -->
+                                <div id="map"></div>
+                            </div>
+                        </div>
+                        <div class="dashboard-col chat-preview">
+                            <div class="panel-header-simple">
+                                <i data-lucide="bot" style="width: 16px; color: var(--color-success);"></i>
+                                <span>LifeBridge AI Emergency Assistant</span>
+                            </div>
+                            <div id="dashboard-chat-container" class="chat-recontainer">
+                                <!-- Chatbot element will reside here in dashboard mode -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Live Disaster Map View -->
+                <section id="view-map-view" class="view-panel">
+                    <div class="full-size-panel">
+                        <div id="full-map-container" class="map-recontainer full-height"></div>
+                    </div>
+                </section>
+
+                <!-- 3. LifeBridge AI Agent View -->
+                <section id="view-agent-view" class="view-panel">
+                    <div class="full-size-panel flex-center">
+                        <div id="full-chat-container" class="chat-recontainer full-height-chat"></div>
+                    </div>
+                </section>
+
+                <!-- 4. Shelters & Roads View -->
+                <section id="view-shelters-view" class="view-panel">
+                    <div class="shelters-workspace-grid">
+
+                        <!-- Left Side: Route finder + Shelter lists -->
+                        <div class="shelters-left-column">
+
+                            <!-- Safe Route Finder Control Panel -->
+                            <div class="control-box-panel">
+                                <h3><i data-lucide="navigation"
+                                        style="color: var(--color-success); width: 18px; vertical-align:middle; margin-right:6px;"></i>
+                                    Safe
+                                    Route Finder</h3>
+                                <div class="route-finder-grid">
+                                    <div class="form-group">
+                                        <label>Starting Point</label>
+                                        <select class="form-control" id="route-start">
+                                            <option value="" disabled selected>Select Starting Point...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Safe Destination (Shelter/Hub)</label>
+                                        <select class="form-control" id="route-end">
+                                            <option value="" disabled selected>Select Safe Destination...</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn-route-action" onclick="calculateSafePath()">Calculate Bypassing
+                                        Route</button>
+                                </div>
+                                <div class="route-info" id="route-status">Select nodes in Karachi to generate a
+                                    hazard-avoiding safe
+                                    path.</div>
+                            </div>
+
+                            <!-- Detailed Shelters List -->
+                            <div class="detailed-shelter-box">
+                                <div class="panel-sub-header">
+                                    <i data-lucide="home"></i> Active Relief Camps & Inventory Levels
+                                </div>
+                                <div class="shelter-cards-list" id="shelter-cards-list-container">
+                                    <!-- Generated Dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Emergency checklists -->
+                        <div class="shelters-right-column">
+                            <div class="planner-box-card">
+                                <h3><i data-lucide="clipboard-check"
+                                        style="color: var(--color-success); width: 18px; vertical-align:middle; margin-right:6px;"></i>
+                                    Disaster Preparedness Kit</h3>
+                                <p class="description">Maintain offline-saved stocks. Mark off items as you secure them.
+                                </p>
+
+                                <div class="planner-tabs">
+                                    <button class="tab-btn active" id="tab-flood"
+                                        onclick="switchChecklist('flood')">Flood</button>
+                                    <button class="tab-btn" id="tab-earthquake"
+                                        onclick="switchChecklist('earthquake')">Earthquake</button>
+                                    <button class="tab-btn" id="tab-cyclone"
+                                        onclick="switchChecklist('cyclone')">Cyclone</button>
+                                </div>
+                                <div class="checklist-items" id="checklist-container">
+                                    <!-- Loaded dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Supply Matching Hub View -->
+                <section id="view-supplies-view" class="view-panel">
+                    <div class="supplies-workspace-grid">
+
+                        <!-- Left Column: Needs list and Offers list -->
+                        <div class="supplies-left-column">
+                            <div class="matching-splits">
+
+                                <!-- Open Shelter Resource Requests -->
+                                <div class="matching-box">
+                                    <h3><i data-lucide="alert-circle"
+                                            style="color: var(--color-primary); width: 16px;"></i> Open Shelter
+                                        Resource Needs</h3>
+                                    <div class="supply-list scrollable" id="shelter-needs-list">
+                                        <!-- Loaded dynamically -->
+                                    </div>
+                                </div>
+
+                                <!-- Open Donation Offers -->
+                                <div class="matching-box">
+                                    <h3><i data-lucide="gift" style="color: var(--color-success); width: 16px;"></i>
+                                        Open Donation Offers
+                                    </h3>
+                                    <div class="supply-list scrollable" id="donation-offers-list">
+                                        <!-- Loaded dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Matches Log -->
+                            <div class="matched-log-box">
+                                <h3><i data-lucide="check-square" style="color: var(--color-success); width: 16px;"></i>
+                                    Synced Resource
+                                    Deliveries</h3>
+                                <div class="matches-history-list" id="matches-history-list">
+                                    <div class="no-records">No resource matches completed yet. Click 'Match Supplies' to
+                                        synchronize an
+                                        action.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Registration Form -->
+                        <div class="supplies-right-column">
+                            <div class="form-card-panel">
+                                <h3>Post Supply Request / Offer</h3>
+                                <p class="description">Register available resources or file requests for immediate
+                                    delivery allocation.
+                                </p>
+
+                                <div class="form-group">
+                                    <label>Type</label>
+                                    <select class="form-control" id="supply-entry-type">
+                                        <option value="offer">Offer Donation / Volunteer Supply</option>
+                                        <option value="request">Request Aid / Shelter Need</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Donor / Shelter Name</label>
+                                    <input type="text" class="form-control" id="supply-entry-name"
+                                        placeholder="e.g. Imran Khan / Karachi Expo Centre">
+                                </div>
+                                <div class="form-group">
+                                    <label>Supply Category</label>
+                                    <select class="form-control" id="supply-entry-category">
+                                        <option value="water">Drinking Water (Reserve % / Packs)</option>
+                                        <option value="food">MRE Food Supplies / Rations</option>
+                                        <option value="medicine">First Aid & Medical Supplies</option>
+                                        <option value="blankets">Space Blankets & Cots</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity / Level Description</label>
+                                    <input type="text" class="form-control" id="supply-entry-qty"
+                                        placeholder="e.g. 50 Packs, 80% Supply">
+                                </div>
+                                <div class="form-group">
+                                    <label>Location Details</label>
+                                    <input type="text" class="form-control" id="supply-entry-loc"
+                                        placeholder="e.g. Gulshan Block 4, Expo Centre">
+                                </div>
+                                <div class="form-group">
+                                    <label>Additional Notes</label>
+                                    <textarea class="form-control" id="supply-entry-notes" rows="3"
+                                        placeholder="Specify expiry, weight, or delivery restrictions..."></textarea>
+                                </div>
+                                <button class="btn-form-action" onclick="submitSupplyEntry()">Dispatch Supply
+                                    Log</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. Safety Registry View -->
+                <section id="view-safety-view" class="view-panel">
+                    <div class="safety-workspace-grid">
+
+                        <!-- Left Side: Directory search and list -->
+                        <div class="safety-left-column">
+                            <div class="directory-container">
+                                <div class="directory-header-controls">
+                                    <h3><i data-lucide="shield-check"
+                                            style="color: var(--color-success); width: 18px;"></i> Registered
+                                        Safe Individuals Directory</h3>
+                                    <div class="search-bar-wrapper">
+                                        <i data-lucide="search" style="width: 14px; color: var(--text-muted);"></i>
+                                        <input type="text" id="safety-search-input" onkeyup="filterSafetyRegistry()"
+                                            placeholder="Search individuals by name...">
+                                    </div>
+                                </div>
+                                <div class="safety-list scrollable" id="safety-registry-list">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Registry form -->
+                        <div class="safety-right-column">
+                            <div class="form-card-panel">
+                                <h3>Register Safety Status</h3>
+                                <p class="description">File details to let relatives know you or your family members are
+                                    located in safe
+                                    zones.</p>
+
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" class="form-control" id="safety-name"
+                                        placeholder="Enter full name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Current Location</label>
+                                    <input type="text" class="form-control" id="safety-location"
+                                        placeholder="e.g. Karachi Expo Centre Shelter, DHA Block 5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Safety Status</label>
+                                    <select class="form-control" id="safety-status">
+                                        <option value="Safe / Sheltered">Safe & Sheltered (Relocated)</option>
+                                        <option value="Safe / At Home">Safe (At Home / Sheltered-in-place)</option>
+                                        <option value="Displaced / Needs Transit">Safe but Displaced (In Transit)
+                                        </option>
+                                        <option value="Requires Assistance">Requires Non-Urgent Assistance</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Primary Emergency Contact</label>
+                                    <input type="text" class="form-control" id="safety-contact"
+                                        placeholder="Phone or email contact">
+                                </div>
+                                <div class="form-group">
+                                    <label>Family Members Sheltered With You</label>
+                                    <input type="text" class="form-control" id="safety-family"
+                                        placeholder="Names of family members present">
+                                </div>
+                                <div class="form-group">
+                                    <label>Status Message / Notes</label>
+                                    <textarea class="form-control" id="safety-notes" rows="3"
+                                        placeholder="Any update on wellness, required medication, or plans..."></textarea>
+                                </div>
+                                <button class="btn-form-action" onclick="submitSafetyRegister()">Publish Safety
+                                    Status</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. Volunteer Tasks View -->
+                <section id="view-volunteer-view" class="view-panel">
+                    <div class="volunteer-workspace-grid">
+
+                        <!-- Left Side: Tasks list -->
+                        <div class="volunteer-left-column">
+                            <div class="volunteer-list-box">
+                                <h3><i data-lucide="help-circle" style="color: var(--color-success); width: 18px;"></i>
+                                    Open Relief &
+                                    Logistics Tasks</h3>
+                                <p class="description">Select pending tasks to claim responsibility and coordinate
+                                    delivery actions.</p>
+                                <div class="volunteer-tasks-list scrollable" id="volunteer-tasks-container">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Task creator form -->
+                        <div class="volunteer-right-column">
+                            <div class="form-card-panel">
+                                <h3>Create Volunteer Task</h3>
+                                <p class="description">Request volunteer support for physical logistics, debris
+                                    clearing, or shelter
+                                    sorting operations.</p>
+
+                                <div class="form-group">
+                                    <label>Task Title</label>
+                                    <input type="text" class="form-control" id="task-title"
+                                        placeholder="e.g. Sort Ration Bags at Expo Centre">
+                                </div>
+                                <div class="form-group">
+                                    <label>Location / Area</label>
+                                    <input type="text" class="form-control" id="task-location"
+                                        placeholder="e.g. Karachi Expo Centre Hall 3">
+                                </div>
+                                <div class="form-group">
+                                    <label>Urgency Level</label>
+                                    <select class="form-control" id="task-priority">
+                                        <option value="High">High (Immediate Assistance Required)</option>
+                                        <option value="Medium">Medium (Standard Dispatch)</option>
+                                        <option value="Low">Low (Support/Sorting Tasks)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Required Volunteers Count</label>
+                                    <input type="number" class="form-control" id="task-qty" value="3" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Description & Objectives</label>
+                                    <textarea class="form-control" id="task-desc" rows="4"
+                                        placeholder="Detail tasks like sorting grain bags, unloading water trucks, or clearing roads..."></textarea>
+                                </div>
+                                <button class="btn-form-action" onclick="submitVolunteerTask()">Post Volunteer
+                                    Duty</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Shared Chatbot Console Template (Will be moved dynamically) -->
+    <div id="shared-chat-template" style="display: none;">
+        <div class="chat-container" id="main-chat-element">
+            <div class="chat-header">
+                <div style="display:flex; align-items:center; gap: 8px;">
+                    <div class="chat-status-dot"></div>
+                    <span style="font-weight:600;" id="chat-header-title">LifeBridge AI Agent (speech active)</span>
+                </div>
+                <button class="chat-voice-toggle" id="voice-toggle-btn" onclick="toggleVoiceOutput()"
+                    title="Toggle Voice Output">
+                    <i data-lucide="volume-2"></i>
+                </button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Message bubbles -->
+            </div>
+
+            <!-- Suggestions Chips -->
+            <div class="chat-suggestions" id="chat-suggestions-container">
+                <!-- Loaded dynamically based on active disaster mode -->
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input-wrapper">
+                <input type="text" id="chat-input" placeholder="Ask anything... e.g. Where is the nearest shelter?"
+                    onkeypress="handleChatKeyPress(event)">
+                <button class="btn-chat-action" id="mic-btn" onclick="startSpeechRecognition()" title="Voice Input">
+                    <i data-lucide="mic"></i>
+                </button>
+                <button class="btn-chat-action send" onclick="sendChatMessage()" title="Send Message">
+                    <i data-lucide="send"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Allocation Modal -->
+    <div class="modal-overlay" id="resource-modal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h3 class="modal-title" id="modal-shelter-name">Shelter Resource Manager</h3>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;" id="modal-shelter-info">
+                Manage critical supply levels at this emergency shelter.
+            </p>
+
+            <div class="section-title">Shelter Supplies Balance</div>
+            <div class="allocation-list" id="modal-supplies-list">
+                <!-- Generated Dynamically -->
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                <button class="btn-route-action" style="flex: 1; background: var(--color-success);"
+                    onclick="saveShelterSupplies()">Save Allocation</button>
+                <button class="btn-route-action"
+                    style="flex: 1; background: var(--bg-card); border: 1px solid var(--border-glow);"
+                    onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio elements for Emergency Notifications -->
+    <audio id="sfx-alert" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav" preload="auto"></audio>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+
+</html>
