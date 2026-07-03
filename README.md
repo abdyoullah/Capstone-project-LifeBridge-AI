@@ -86,10 +86,6 @@ python -m http.server 8000
 
 Then visit http://localhost:8000 in your browser.
 
-Map tiles require an internet connection to load (OpenStreetMap/CARTO). Core app functionality (chat, forms, task board, registry) works offline.
-
----
-
 𝗣𝗿𝗼𝗷𝗲𝗰𝘁 𝗦𝘁𝗿𝘂𝗰𝘁𝘂𝗿𝗲
 
 ```
@@ -117,3 +113,5 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 𝗔𝗰𝗸𝗻𝗼𝘄𝗹𝗲𝗱𝗴𝗲𝗺𝗲𝗻𝘁𝘀
 
 Built as a capstone project focused on disaster resilience and emergency coordination for Pakistan's cyclone, earthquake, and flood-prone regions.
+
+𝗖𝗼𝗻𝗻𝗲𝗰𝘁 𝘄𝗶𝘁𝗵 𝗠𝗲 𝘁𝗵𝗿𝗼𝘂𝗴𝗵 𝗟𝗶𝗻𝗸𝗲𝗱𝗜𝗻:https://www.linkedin.com/in/muhammad-abdullah-073396376?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app
