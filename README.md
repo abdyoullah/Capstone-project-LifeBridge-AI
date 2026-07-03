@@ -4,6 +4,10 @@
 𝐎𝐯𝐞𝐫𝐯𝐢𝐞𝐰
 LifeBridge Pakistan is a disaster-response web application designed to help coordinate relief efforts during major crises — cyclones, earthquakes, and floods. It brings together live mapping, an offline-capable AI assistant, shelter and route information, supply-demand matching, a safety registry, and volunteer task management into a single, unified interface.
 
+📌𝗣𝗿𝗼𝗷𝗲𝗰𝘁 𝗗𝗲𝗺𝗼 𝗦𝗰𝗿𝗲𝗲𝗻𝘀𝗵𝗼𝘁:
+
+<img width="1920" height="865" alt="a1" src="https://github.com/user-attachments/assets/2975c4d0-1ab3-4238-afab-15869572ff7f" />
+
 The platform supports multiple real-world disaster scenarios, allowing responders to switch context instantly between:
 
 - Karachi Cyclone (Category 4)
@@ -27,6 +31,8 @@ A persistent sidebar provides quick access to all core modules:
 𝗩𝗼𝗹𝘂𝗻𝘁𝗲𝗲𝗿 𝗧𝗮𝘀𝗸𝘀: Logistics task board with claimable and completable duties 
 
 A permanent, glowing 🆘 Trigger SOS button is always accessible from the sidebar.
+<img width="1108" height="642" alt="a8" src="https://github.com/user-attachments/assets/0fb6c5a0-a9a0-4e54-b465-479d308e50da" />
+
 
 𝗠𝘂𝗹𝘁𝗶-𝗦𝗰𝗲𝗻𝗮𝗿𝗶𝗼 𝗗𝗶𝘀𝗮𝘀𝘁𝗲𝗿 𝗦𝘄𝗶𝘁𝗰𝗵𝗲𝗿
 Switching scenarios from the header dropdown dynamically:
@@ -62,15 +68,6 @@ A custom DOM-repositioning system (in app.js) moves the "#map" and ".chat-contai
 
 ---
 
-𝗧𝗲𝗰𝗵 𝗦𝘁𝗮𝗰𝗸
-
-- HTML5 / CSS3 / JavaScript (Vanilla)
-- Leaflet.js — interactive mapping
-- localStorage — client-side data persistence (Safety Registry, tasks)
-- No build tools or external frameworks required
-
----
-
 𝗚𝗲𝘁𝘁𝗶𝗻𝗴 𝗦𝘁𝗮𝗿𝘁𝗲𝗱
 
 𝗣𝗿𝗲𝗿𝗲𝗾𝘂𝗶𝘀𝗶𝘁𝗲𝘀
@@ -86,32 +83,9 @@ python -m http.server 8000
 
 Then visit http://localhost:8000 in your browser.
 
-𝗣𝗿𝗼𝗷𝗲𝗰𝘁 𝗦𝘁𝗿𝘂𝗰𝘁𝘂𝗿𝗲
-
-```
-lifebridge-pakistan/
-├── index.html          # Main app shell & sidebar navigation
-├── app.js              # Core logic: scenario switching, map, chat, modules
-├── styles.css           # Styling, responsive layout, theming
-└── README.md
-```
-
-𝗞𝗻𝗼𝘄𝗻 𝗟𝗶𝗺𝗶𝘁𝗮𝘁𝗶𝗼𝗻𝘀 / 𝗙𝘂𝘁𝘂𝗿𝗲 𝗜𝗺𝗽𝗿𝗼𝘃𝗲𝗺𝗲𝗻𝘁𝘀
-
-- Map tiles depend on live internet access for OpenStreetMap/CARTO
-- Data persistence currently limited to browser `localStorage` (no backend/database yet)
-- Potential future additions: backend API for real-time data sync, push notifications, multi-user collaboration, and integration with official NDMA/Rescue 1122 data feeds
-
----
-
 𝗟𝗶𝗰𝗲𝗻𝘀𝗲
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
----
-
-𝗔𝗰𝗸𝗻𝗼𝘄𝗹𝗲𝗱𝗴𝗲𝗺𝗲𝗻𝘁𝘀
-
-Built as a capstone project focused on disaster resilience and emergency coordination for Pakistan's cyclone, earthquake, and flood-prone regions.
 
 𝗖𝗼𝗻𝗻𝗲𝗰𝘁 𝘄𝗶𝘁𝗵 𝗠𝗲 𝘁𝗵𝗿𝗼𝘂𝗴𝗵 𝗟𝗶𝗻𝗸𝗲𝗱𝗜𝗻:https://www.linkedin.com/in/muhammad-abdullah-073396376?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app
